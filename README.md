@@ -73,11 +73,10 @@ This work builds upon the **ChiSCO (Chinese Imagined Speech Corpus)** dataset cr
 ✅ **Strong separation** between correct/incorrect pairs (gap = 0.51)  
 ✅ **Meaningful learning** validated by permutation tests  
 ⚠️ **Overfitting** (34% → 17%, likely driven by limited inter-subject diversity (n=2))  
-⚠️ **Mode collapse** present (embedding std = 0.043 vs expected ~0.2) but model still discriminates  
+⚠️ **Mode collapse** present (embedding std = 0.043 vs expected ~0.2) though embeddings remain discriminative
 ⚠️ **Asymmetric retrieval** (EEG→Text better than Text→EEG)  
 
-**Interpretation:** Despite overfitting and mode collapse, the model successfully learned subject-invariant semantic features from cross-subject training, as evidenced by strong separation gaps and performance well above permutation baselines. The challenges indicate need for more subjects and architectural improvements (diversity regularization, attention pooling).
-
+**Interpretation:** The model learned partially subject-invariant semantic representations under cross-subject training constraints, as evidenced by strong separation gaps and performance well above permutation baselines. The observed limitations primarily reflect restricted subject diversity rather than lack of sample volume, indicating that scaling to additional subjects and incorporating diversity-encouraging mechanisms (e.g., embedding regularization, attention pooling) are likely to yield further gains.
 ---
 
 ## 🏗️ Architecture
