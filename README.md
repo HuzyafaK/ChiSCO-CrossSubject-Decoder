@@ -72,7 +72,7 @@ This work builds upon the **ChiSCO (Chinese Imagined Speech Corpus)** dataset cr
 ✅ **34x better than chance** on test set (0.17 vs 0.005)  
 ✅ **Strong separation** between correct/incorrect pairs (gap = 0.51)  
 ✅ **Meaningful learning** validated by permutation tests  
-⚠️ **Significant overfitting** (34% → 17%, likely due to only 2 subjects)  
+⚠️ **Overfitting** (34% → 17%, likely driven by limited inter-subject diversity (n=2))  
 ⚠️ **Mode collapse** present (embedding std = 0.043 vs expected ~0.2) but model still discriminates  
 ⚠️ **Asymmetric retrieval** (EEG→Text better than Text→EEG)  
 
