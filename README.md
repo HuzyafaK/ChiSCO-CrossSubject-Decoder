@@ -135,7 +135,7 @@ This work builds upon the **ChiSCO (Chinese Imagined Speech Corpus)** dataset cr
 
 **Engineering optimizations:**
 1. **Hierarchical CNN downsampling**: Reduces 1650 timesteps to ~206 features for efficient Transformer processing
-2. **Memory-efficient pipeline**: Lazy loading + streaming normalization (87% memory reduction: 28GB → 3.6GB)
+2. **Memory-efficient pipeline**: Lazy loading + streaming normalization
 3. **Dual-encoder architecture**: Enables fast retrieval via pre-computed text embeddings
 
 ---
@@ -285,7 +285,6 @@ text_B = retrieve_text(embedding_A, person_B_vocabulary)
 **Key advantage:** Neural embeddings capture **semantic meaning** independent of:
 - Surface form (exact words)
 - Individual brain patterns (subject-invariant)
-- Language (could map to any language)
 
 This enables true "thought-level" communication beyond traditional text/speech.
 
@@ -398,7 +397,7 @@ for batch in DataLoader(gallery, batch_size=32):
 # Avoid creating N×N similarity matrix (would be 200×200×4 bytes = 160KB, but for full dataset: GB scale)
 ```
 
-**Impact:** Reduced peak memory from 28GB → 3.6GB (87% reduction), enabling training on single GPU.
+**Impact:** Reduced peak memory, enabling training on single GPU.
 
 ---
 
@@ -436,7 +435,7 @@ This is an **independent research project** for my startup Excelleve. It uses th
 
 - **Not affiliated** with original ChiSCO authors or Harbin Institute of Technology
 - **Not endorsed** by the dataset creators
-- An **unpublished MVP** validated against existing literature
+- An **internal MVP** validated against existing literature
 - **Properly attributed** to Zhang et al. (2024)
 
 ### Novel Contributions
@@ -498,24 +497,23 @@ The ChiSCO paper focused on subject-specific classification (25-29% on 39-way ta
 
 ### Long-term Vision
 1. **Self-supervised pretraining**: Leverage unlabeled EEG data
-2. **Multi-modal fusion**: Combine EEG with eye-tracking, fMRI
-3. **Real-time deployment**: Optimize for low-latency inference (<50ms)
-4. **Generative decoding**: Train transformer decoder to generate text from neural embeddings (enabling open-ended thought-to-speech)
-5. **Agent communication**: Use embeddings as interface between thought and AI systems
+2. **Real-time deployment**: Optimize for low-latency inference (<50ms)
+3. **Generative decoding**: Train transformer decoder to generate text from neural embeddings (enabling open-ended thought-to-speech)
+4. **Agent communication**: Use embeddings as interface between thought and AI systems
 
-**Target performance:** 25-30% top-1 accuracy with above improvements on expanded subject pool
+**Target performance:** 30-35% top-1 accuracy with above improvements on expanded subject pool
 
 ---
 
 ## 📖 Citation
 ```bibtex
-@software{khokhar2025crosssubject,
+@software{khokhar2026crosssubject,
   author = {Khokhar, Muhammad Huzyafa},
   title = {Cross-Subject Imagined Speech EEG-to-Text Decoder},
-  year = {2025},
+  year = {2026},
   publisher = {GitHub},
   url = {https://github.com/HuzyafaK/ChiSCO-CrossSubject-Decoder},
-  note = {Unpublished research MVP for Excelleve}
+  note = {Internal research MVP for Excelleve}
 }
 ```
 
