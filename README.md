@@ -501,7 +501,7 @@ The ChiSCO paper focused on subject-specific semantics classification (25-29% on
 3. **Generative decoding**: Train transformer decoder to generate text from neural embeddings (enabling open-ended thought-to-speech)
 4. **Agent communication**: Use embeddings as interface between thought and AI systems
 
-**Target performance:** 30-35% top-1 accuracy with above improvements on expanded subject pool
+**Target performance:** 25-30% top-1 accuracy with above improvements on expanded subject pool
 
 ---
 
