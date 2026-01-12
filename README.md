@@ -447,7 +447,7 @@ This is an **independent research project** for my startup Excelleve. It uses th
 3. **200-way sentence retrieval**: Open-vocabulary matching vs classification
 4. **Subject-invariant learning**: Achieving 34x better than chance despite r=0.13 correlation
 
-The ChiSCO paper focused on subject-specific classification (25-29% on 39-way task). This work tackles cross-subject generalization—critical for practical BCI deployment.
+The ChiSCO paper focused on subject-specific semantics classification (25-29% on 39-way task). This work tackles cross-subject generalization—critical for practical BCI deployment.
 
 ---
 
