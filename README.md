@@ -77,6 +77,7 @@ This work builds upon the **ChiSCO (Chinese Imagined Speech Corpus)** dataset cr
 ⚠️ **Asymmetric retrieval** (EEG→Text better than Text→EEG)  
 
 **Interpretation:** The model learned partially subject-invariant semantic representations under cross-subject training constraints, as evidenced by strong separation gaps and performance well above permutation baselines. The observed limitations primarily reflect restricted subject diversity rather than lack of sample volume, indicating that scaling to additional subjects and incorporating diversity-encouraging mechanisms (e.g., embedding regularization, attention pooling) are likely to yield further gains.
+
 ---
 
 ## 🏗️ Architecture
