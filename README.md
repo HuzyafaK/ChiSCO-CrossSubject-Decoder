@@ -1,208 +1,308 @@
-<details>
-<summary><b>Click to expand README.md (copy entire content)</b></summary>
-````markdown
 # Cross-Subject Imagined Speech EEG-to-Text Decoder
-First cross-subject contrastive learning system for sentence-level imagined speech decoding
-Show Image
-Show Image
-Show Image
 
-🎯 Key Achievement
-Achieved 17% top-1 accuracy on 200-way EEG-to-text retrieval (34x better than chance) despite extremely low inter-subject correlation (r=0.13-0.17) on the ChiSCO imagined speech dataset.
-Why this matters: Most EEG decoders require 900+ minutes of per-user calibration. This cross-subject approach eliminates that barrier, making BCIs practical for real-world deployment.
-Built on ChiSCO Dataset
-This work builds upon the ChiSCO (Chinese Imagined Speech Corpus) dataset created by Zhang et al. (2024) at Harbin Institute of Technology—the first dataset for sentence-level imagined speech with 6,681 trials per subject. The ChiSCO team's rigorous data collection (900+ minutes per subject, attention checks, quality controls) and their pioneering work on imagined speech paradigms made this cross-subject research possible.
-Key insight from ChiSCO paper: Inter-subject correlations of 0.13-0.17 indicate that EEG signals are ~87% subject-specific—making cross-subject learning the critical challenge for practical BCIs.
+A **cross-subject, CLIP-style contrastive learning system** for decoding *sentence-level imagined speech* from EEG, evaluated on the **ChiSCO** dataset.
 
-📊 Performance Metrics
-MetricValueBaselineTop-1 Accuracy17.0%0.5% (chance)Top-5 Accuracy47.5%2.5% (chance)Mean Reciprocal Rank (MRR)0.3270.005Median Rank6 / 200100 / 200Separation Gap0.5090.0Inter-subject Correlation0.13-0.17N/A
-Training set: 34% top-1 (proof of learning)
-Test set: 17% top-1 (generalization with overfitting due to only 2 subjects)
-Recall Performance
-MetricValueRecall@117.0%Recall@547.5%Recall@1068.5%Recall@2085.5%Recall@5096.0%
+This project demonstrates that **semantic alignment between EEG and text is possible across subjects**, despite extremely low inter-subject neural correlation.
 
-🏗️ Architecture
-Dual-Encoder Contrastive Learning (CLIP-inspired)
-┌─────────────────────────────────────────────────────────────┐
-│                        EEG Branch                           │
-│  Raw EEG (125, 1650)                                        │
-│       ↓                                                      │
-│  CNN Feature Extractor (125→256→512 channels)              │
-│       ↓                                                      │
-│  Time Projection (512 → 512)                               │
-│       ↓                                                      │
-│  Positional Encoding                                        │
-│       ↓                                                      │
-│  Transformer Encoder (2 layers, 8 heads)                   │
-│       ↓                                                      │
-│  Temporal Pooling (mean)                                   │
-│       ↓                                                      │
-│  L2 Normalization → EEG Embedding (512-D)                  │
-└─────────────────────────────────────────────────────────────┘
+---
 
-┌─────────────────────────────────────────────────────────────┐
-│                        Text Branch                          │
-│  Chinese Text                                               │
-│       ↓                                                      │
-│  BERT-base-chinese (110M params)                           │
-│       ↓                                                      │
-│  [CLS] Token + Projection (768 → 512)                     │
-│       ↓                                                      │
-│  L2 Normalization → Text Embedding (512-D)                 │
-└─────────────────────────────────────────────────────────────┘
+## 🎯 Key Result
 
-              ↓                    ↓
-         [Cosine Similarity (B × B)]
-                    ↓
-           [Contrastive CLIP Loss]
-Key Innovations
+**17.0% Top-1 accuracy on 200-way EEG → text retrieval**,
+**34× better than chance (0.5%)**, without subject-specific calibration.
 
-Hierarchical CNN: Conv1D stride 4→2 downsamples 1650 timesteps to ~206 features
-Cross-subject Learning: Trained on mixed subjects without subject IDs
-Memory Efficiency: Lazy loading + streaming normalization (87% memory reduction)
-Contrastive Alignment: EEG and text embeddings in shared 512-D space
+> Achieved despite inter-subject EEG correlations of only **r = 0.13–0.17**, meaning ~87% of the signal is subject-specific noise.
+
+---
+
+## 📊 Performance Summary
+
+### Retrieval Metrics (Test Set)
+
+| Metric                     | Value       | Chance    |
+| -------------------------- | ----------- | --------- |
+| Top-1 Accuracy             | **17.0%**   | 0.5%      |
+| Top-5 Accuracy             | **47.5%**   | 2.5%      |
+| Mean Reciprocal Rank (MRR) | **0.327**   | 0.005     |
+| Median Rank                | **6 / 200** | 100 / 200 |
+| Separation Gap             | **0.509**   | ~0.0      |
+
+**Training accuracy:** 34% (proof of learning)
+**Test accuracy:** 17% (cross-subject generalization with limited subjects)
+
+---
+
+## 🧠 Why This Matters
+
+Most EEG-based imagined speech decoders require **900+ minutes of per-user calibration**.
+
+This work explores a **subject-invariant alternative**:
+
+* No subject IDs
+* No per-user fine-tuning
+* Open-vocabulary sentence retrieval
+
+This is a step toward **practical, calibration-light BCIs**.
+
+---
+## 🧠 Neural Embeddings & Shared Latent Space
+
+This project is built around the concept of **neural embeddings**.
+
+Rather than directly predicting text from EEG, both modalities are encoded into a **shared continuous embedding space** (ℝ⁵¹²):
+
+- **EEG signals** → EEG encoder → 512-D embedding  
+- **Text sentences** → BERT encoder → 512-D embedding  
+
+In this shared space:
+- **Correct EEG–text pairs lie close together**
+- **Incorrect pairs are far apart**
+
+The task is therefore framed as **cross-modal retrieval**, not classification or sequence generation.
+
+---
+
+### Why Neural Embeddings?
+
+Neural embeddings enable:
+- Modality-agnostic semantic representations
+- Robust cross-subject generalization
+- Scalable evaluation without fixed vocabularies
+- Natural handling of open-set retrieval problems
+
+This is especially important for EEG, where:
+- Signals are noisy and subject-specific
+- Absolute decoding is unreliable
+- Relative similarity is more stable than direct prediction
+
+---
+
+### What the Model Actually Learns
+
+The model does **not** learn word boundaries or phonemes.
+
+Instead, it learns to **align distributions**:
+
+- EEG embeddings are pulled toward their matching text embeddings
+- Non-matching pairs are pushed away
+- Training uses a **CLIP-style contrastive objective**
+
+This encourages the model to capture **semantic intent**, not surface-level signal patterns.
+
+---
+
+### Why Retrieval-Based Evaluation?
+
+Because outputs are embeddings, performance is measured using **ranking metrics**, not token accuracy:
+
+- Top-K Accuracy
+- Mean Reciprocal Rank (MRR)
+- Median Rank
+- Recall@K
+- Chance-normalized accuracy
+- Similarity separation gap
+
+These metrics reveal:
+- Whether failures are near-misses or catastrophic
+- Whether embeddings are collapsed or well-structured
+- Whether learning exceeds chance by a meaningful margin
+
+---
+
+### Interpreting the Results
+
+Strong retrieval performance (e.g., **17% Top-1 over 200 candidates**) indicates that the learned **embedding geometry is meaningful**, even across subjects with extremely low EEG correlation.
+
+This validates the core hypothesis:
+> *Imagined speech EEG contains transferable semantic structure when represented as neural embeddings.*
 
 
-🔬 The Cross-Subject Challenge
-Why is r=0.13 correlation so hard?
-EEG signals are ~87% subject-specific. Same sentence, different neural patterns:
-pythonSubject 1: [0.23, -0.45, 0.67, -0.12, ...] 
-Subject 2: [0.15, -0.33, 0.51, -0.08, ...]
-Correlation: 0.13 (only 13% similar!)
-Solution: Contrastive learning extracts semantic meaning invariant to subject-specific noise.
+## 🏗️ Architecture Overview
 
-🚀 Quick Start
-Installation
-bashgit clone https://github.com/HuzyafaK/ChiSCO-CrossSubject-Decoder.git
+**Dual-Encoder Contrastive Learning (CLIP-inspired)**
+
+### EEG Branch
+
+```
+Raw EEG (125 × 1650)
+        ↓
+Conv1D Feature Extractor
+(125 → 256 → 512)
+        ↓
+Time Projection (512 → 512)
+        ↓
+Positional Encoding
+        ↓
+Transformer Encoder
+(2 layers, 8 heads)
+        ↓
+Temporal Mean Pooling
+        ↓
+L2 Normalization
+→ 512-D EEG Embedding
+```
+
+### Text Branch
+
+```
+Chinese Text
+        ↓
+BERT-base-chinese
+        ↓
+[CLS] Token
+        ↓
+Linear Projection (768 → 512)
+        ↓
+L2 Normalization
+→ 512-D Text Embedding
+```
+
+### Training Objective
+
+```
+Cosine Similarity (EEG × Text)
+        ↓
+Bidirectional CLIP Contrastive Loss
+```
+
+EEG and text embeddings are trained to align **only when they represent the same sentence**.
+
+---
+
+## 🔬 Core Idea: Contrastive Alignment
+
+For a batch of size `B`, the model learns a similarity matrix:
+
+```
+EEG_i ↔ Text_j   →   High similarity only when i == j
+```
+
+This forces the model to:
+
+* Pull matching EEG–text pairs together
+* Push non-matching pairs apart
+* Learn **semantic features**, not subject-specific patterns
+
+---
+
+## 🧪 Diagnostic Findings
+
+### ✅ Permutation Test
+
+| Condition       | Accuracy  |
+| --------------- | --------- |
+| True labels     | **17.0%** |
+| Shuffled labels | ~0.5%     |
+
+→ Confirms genuine EEG–text learning
+
+### ⚠️ Representation Compression
+
+* Embedding standard deviation: **0.042**
+* Expected healthy diversity: ~0.2
+
+This indicates **low embedding diversity**, not full collapse. Improving representation richness is a key next step.
+
+---
+
+## 🚀 Quick Start
+
+### Installation
+
+```bash
+git clone https://github.com/HuzyafaK/ChiSCO-CrossSubject-Decoder.git
 cd ChiSCO-CrossSubject-Decoder
 pip install -r requirements.txt
-Download ChiSCO Dataset
-bash# Visit: https://openneuro.org/datasets/ds005170
-# Place files in data/ directory
-Training
-bashpython src/train.py \
-    --data_glob "data/**/*.pkl" \
-    --subjects S1 S2 \
-    --batch_size 32 \
-    --epochs 30 \
-    --lr_eeg 1e-4 \
-    --lr_bert 2e-5
-Evaluation
-bashpython src/evaluate.py \
-    --checkpoint_path chisco_clip_best_model.pt
+```
 
-🔧 Memory-Efficient Design
-Key optimizations for large EEG datasets:
+### Dataset
 
-Lazy Loading: Index-based retrieval (store paths, not tensors)
-Streaming Normalization: Compute stats without full data loading
-Chunked Encoding: Process via DataLoader (no O(N²) matrices)
+Download the **ChiSCO dataset**:
 
-Impact: 28GB → 3.6GB peak memory (87% reduction)
+* OpenNeuro: `ds005170`
+* Place `.pkl` files under `data/`
 
-🧪 Diagnostic Analysis
-Permutation Test
+### Training
 
-Model: 17%
-Shuffled: 0.5%
-Conclusion: Genuine EEG-text learning ✅
+```bash
+python src/train.py \
+  --data_glob "data/**/*.pkl" \
+  --subjects S1 S2 \
+  --batch_size 32 \
+  --epochs 30
+```
 
-Mode Collapse Detection
+### Evaluation
 
-Embedding std: 0.042
-Expected: ~0.2
-Finding: Representation collapse identified
+```bash
+python src/evaluate.py \
+  --checkpoint_path chisco_clip_best_model.pt
+```
 
+---
 
-⚠️ Important Notes
-Research Context
-This is an independent research project for my startup Excelleve. It uses the publicly available ChiSCO dataset but is:
+## 🔧 Memory-Efficient Design
 
-Not affiliated with original ChiSCO authors or Harbin Institute of Technology
-Not endorsed by the dataset creators
-An independent implementation of cross-subject learning
-Properly attributed to Zhang et al. (2024)
+Designed to run on **Kaggle / single-GPU systems**:
 
-Novel Contributions
-What's new (not in original ChiSCO paper):
+* Lazy EEG loading (index-based)
+* Streaming mean/std normalization
+* Chunked gallery encoding
+* No O(N²) similarity matrices
 
-Cross-subject approach: Mixed training without subject IDs
-Contrastive learning: CLIP-inspired dual-encoder for EEG-text alignment
-200-way retrieval: Open-vocabulary sentence matching (vs 39-way classification)
-Memory efficiency: Lazy loading for resource-constrained training
+---
 
+## 📚 Dataset Attribution
 
-📚 Dataset
-ChiSCO (Chinese Imagined Speech Corpus)
+This work builds on the **ChiSCO (Chinese Imagined Speech Corpus)**:
 
-Paper: Nature Scientific Data, 2024
-Repository: OpenNeuro ds005170
-Size: 6,681 trials × 3 subjects (900+ min per subject)
-Task: Read sentence (5s) → Imagine speaking (3.3s)
-EEG: 125 channels, 500Hz
-Language: Chinese (6-15 characters, 39 semantic categories)
+* Zhang et al., *Scientific Data*, 2024
+* 6,681 trials × 3 subjects
+* EEG: 125 channels @ 500 Hz
+* Sentence-level imagined speech
 
+This project is **independent** and **not affiliated** with the original authors.
 
-🛠️ Technical Stack
+---
 
-PyTorch 2.0+
-Hugging Face Transformers (BERT-base-chinese)
-NumPy, tqdm, pickle
-NLTK (BLEU), Rouge
+## 🛠️ Tech Stack
 
+* PyTorch
+* Hugging Face Transformers (BERT)
+* NumPy, tqdm, pickle
+* NLTK (BLEU), ROUGE
 
-🎯 Future Work
-Immediate Improvements
+---
 
-Diversity loss to prevent mode collapse
-Attention-based pooling vs mean pooling
-Temperature scheduling (0.07 → 0.03)
+## 🎯 Future Work
 
-Long-term
+* Diversity regularization to improve embeddings
+* Attention-based temporal pooling
+* Temperature scheduling
+* Few-minute subject adaptation
+* Self-supervised EEG pretraining
 
-Subject adaptation (5-min fine-tuning for new users)
-Self-supervised pretraining
-Multi-modal fusion (EEG + eye-tracking)
+---
 
-Expected: 25-30% top-1 with improvements
+## 📖 Citation
 
-📖 Citation
-bibtex@software{khokhar2025crosssubject,
+```bibtex
+@software{khokhar2025crosssubject,
   author = {Khokhar, Muhammad Huzyafa},
   title = {Cross-Subject Imagined Speech EEG-to-Text Decoder},
   year = {2025},
   publisher = {GitHub},
   url = {https://github.com/HuzyafaK/ChiSCO-CrossSubject-Decoder}
 }
-ChiSCO Dataset Citation
-This work builds upon the ChiSCO dataset:
-bibtex@article{zhang2024chisco,
-  title={Chisco: An EEG-based BCI dataset for decoding of imagined speech},
-  author={Zhang, Zihan and Ding, Xiao and Bao, Yu and Zhao, Yi and Liang, Xia and Qin, Bing and Liu, Ting},
-  journal={Scientific Data},
-  volume={11},
-  number={1},
-  pages={1265},
-  year={2024},
-  publisher={Nature Publishing Group UK London},
-  doi={10.1038/s41597-024-04114-1}
-}
+```
 
-🙏 Acknowledgments
-ChiSCO Dataset Creators:
+---
 
-Zihan Zhang, Xiao Ding, Yu Bao, Yi Zhao, Bing Qin, Ting Liu (Harbin Institute of Technology)
-Xia Liang (Northeast Forestry University)
+## 📄 License
 
-Additional:
+MIT License
 
-East China Normal University Xing Tian EEG Lab (equipment access, demo support)
-OpenAI CLIP (Radford et al., 2021) for contrastive learning framework
-Hugging Face for Transformers library
+---
 
-
-📄 License
-MIT License - See LICENSE
-
-Built with 🧠 by Muhammad Huzyafa Khokhar | Excelleve
-Pioneering non-invasive thought-to-speech systems
+Built with 🧠 by **Muhammad Huzyafa Khokhar**
+Excelleve — Non-invasive Thought-to-Speech Systems
