@@ -238,6 +238,7 @@ From our results:
 | **Embedding Std** | 0.043 | 0.043 | Mode collapse detected (expected ~0.2) |
 
 **Key findings:**
+
 ✅ Strong separation between correct/incorrect pairs (gap > 0.5)  
 ✅ Model learned discriminative features despite mode collapse  
 ⚠️ Low embedding diversity suggests over-compression in 512-D space  
